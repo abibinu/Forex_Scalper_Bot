@@ -8,11 +8,17 @@ Automation‑ready scalping framework inspired by Bob Volman’s price action me
 🧠 Strategy Overview
 
 Model Type: Trend Continuation Scalping
+
 Execution Style: Pullback Breakout
+
 Chart Type: 70 Tick
+
 Primary Instrument: EURUSD
+
 Secondary (optional): GBPUSD, XAUUSD
+
 Holding Time: 1 – 10 Minutes
+
 Deployment: Manual / Hybrid / Fully Automated
 
 > Objective: Enter institutional continuation moves after liquidity pullbacks within a confirmed trend.
