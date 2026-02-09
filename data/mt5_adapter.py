@@ -92,6 +92,10 @@ class MT5Adapter:
         result = mt5.order_send(request)
         return result.retcode == mt5.TRADE_RETCODE_DONE
 
+    def position_exists(self, ticket: int) -> bool:
+        position = mt5.positions_get(ticket=ticket)
+        return position is not None and len(position) > 0
+
     def close_position(self, ticket: int) -> bool:
         position = mt5.positions_get(ticket=ticket)
         if not position:
