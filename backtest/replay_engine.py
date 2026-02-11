@@ -62,7 +62,10 @@ class ReplayEngine:
         if trade["direction"] == "UP": profit_pips = price_to_pips(exit_price - entry_price, self.symbol)
         else: profit_pips = price_to_pips(entry_price - exit_price, self.symbol)
         self.completed_trades.append({"ticket": ticket, "profit": profit_pips, "reason": reason or trade.get("exit_reason", "UNKNOWN"), "direction": trade["direction"]})
-        self.risk_engine.register_trade_result(win=(profit_pips > 0))
+
+        # Only register if not already registered by ExecutionEngine
+        if not trade.get("result_registered"):
+            self.risk_engine.register_trade_result(win=(profit_pips > 0))
 
     def _close_all_remaining(self):
         for ticket in list(self.exec_engine.active_trades.keys()):

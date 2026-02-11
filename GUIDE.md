@@ -46,8 +46,25 @@ The bot operates as a **State Machine** with three primary phases:
 You can verify profitability and logic using the synthetic backtester.
 
 ### How to Run
+By default, the backtester uses synthetic data:
 ```bash
-python3 run_backtest.py
+python3 run_backtest.py --days 2 --source synthetic
+```
+
+To run on **real historical data** from MetaTrader 5 (Windows only):
+1.  Open your MT5 terminal.
+2.  Run the downloader script:
+    ```bash
+    python scripts/download_data.py --symbol EURUSD --days 5
+    ```
+3.  Run the backtest on the downloaded CSV:
+    ```bash
+    python3 run_backtest.py --source csv --csv data/historical_ticks.csv
+    ```
+
+Or run directly from MT5 (downloads and tests in one step):
+```bash
+python3 run_backtest.py --source mt5 --days 5
 ```
 
 ### How it Works
