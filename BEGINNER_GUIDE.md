@@ -27,6 +27,11 @@ Before risking real money, you should always test the bot. We have built a "flig
     python run_backtest.py --days 7 --source mt5
     ```
 4.  **Read the Results**: The bot will simulate the trading and print a report like this:
+2.  **Type this command** and press Enter:
+    ```bash
+    python run_backtest.py
+    ```
+3.  **Read the Results**: The bot will simulate two days of trading and print a report like this:
     - **Win Rate**: How many trades were successful (Target: 60%+).
     - **Profit Factor**: If this is above 1.0, the bot is making more than it loses.
     - **Total Net Profit**: How many "pips" (points) the bot gained.

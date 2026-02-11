@@ -65,6 +65,8 @@ To run on **real historical data** from MetaTrader 5 (Windows only):
 Or run directly from MT5 (downloads and tests in one step):
 ```bash
 python3 run_backtest.py --source mt5 --days 5
+```bash
+python3 run_backtest.py
 ```
 
 ### How it Works
