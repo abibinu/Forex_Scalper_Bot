@@ -19,7 +19,7 @@ class PullbackQualifier:
         if impulse_range == 0:
             return False
 
-        if impulse["direction"] == "UP":
+        if impulse["direction"] == "BUY":
             current_low = min(c["low"] for c in pb_candles)
             depth = (impulse["high"] - current_low) / impulse_range
 

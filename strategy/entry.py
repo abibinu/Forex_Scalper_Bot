@@ -7,7 +7,7 @@ class EntryTrigger:
     def check_trigger(self, setup, candle):
         direction = setup["direction"]
 
-        if direction == "UP":
+        if direction == "BUY":
             trigger_price = setup["trigger_price"] + pips_to_price(self.buffer_pips)
             if candle["high"] >= trigger_price:
                 return trigger_price

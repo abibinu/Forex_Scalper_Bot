@@ -8,7 +8,7 @@ class StructureMonitor:
         direction = setup["direction"]
         ema = indicators.get("ema20")
 
-        if direction == "UP":
+        if direction == "BUY":
             # Invalidate if lower low forms compared to the start of the setup/impulse or pullback low
             if candle["low"] < setup.get("invalidation_price", 0):
                 return False

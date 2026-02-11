@@ -39,9 +39,9 @@ class ExecutionEngine:
                 del self.active_trades[ticket]
                 continue
         for ticket, trade in list(self.active_trades.items()):
-            current_price = tick["bid"] if trade["direction"] == "UP" else tick["ask"]
+            current_price = tick["bid"] if trade["direction"] == "BUY" else tick["ask"]
             if not trade["tp_touched"]:
-                if trade["direction"] == "UP":
+                if trade["direction"] == "BUY":
                     if current_price >= trade["tp"]: trade["tp_touched"] = True
                 else:
                     if current_price <= trade["tp"]: trade["tp_touched"] = True

@@ -7,18 +7,20 @@ from risk.risk_engine import RiskEngine
 class TestIntegration(unittest.TestCase):
     def test_full_signal_flow(self):
         risk = RiskEngine()
-        strategy = StrategyEngine(risk)
+        strategy = StrategyEngine(risk, symbol="EURUSD")
 
         # 1. Simulate established uptrend and an impulse leg
         # Feed exactly 5 candles to trigger impulse detection
         impulse_high = 0
+        from datetime import datetime
         for i in range(5):
             candle = {
                 "open": 1.1000 + i*0.0002,
                 "close": 1.1002 + i*0.0002,
                 "high": 1.1003 + i*0.0002,
                 "low": 1.1000 + i*0.0002,
-                "index": i
+                "index": i,
+                "timestamp": datetime(2026, 1, 1, 13, 0)
             }
             impulse_high = candle["high"]
             indicators = {
@@ -42,7 +44,8 @@ class TestIntegration(unittest.TestCase):
                 "close": 1.1007,
                 "high": 1.1008,
                 "low": 1.1007,
-                "index": i
+                "index": i,
+                "timestamp": datetime(2026, 1, 1, 13, 5)
             }
             # Keep price near EMA
             indicators = {
@@ -62,7 +65,8 @@ class TestIntegration(unittest.TestCase):
             "close": trigger_price + 0.0005,
             "high": trigger_price + 0.0005,
             "low": trigger_price - 0.0001,
-            "index": 8
+            "index": 8,
+            "timestamp": datetime(2026, 1, 1, 13, 10)
         }
         indicators = {
             "ema20": 1.1006,
@@ -72,7 +76,7 @@ class TestIntegration(unittest.TestCase):
         signal = strategy.process_candle(candle, indicators)
 
         self.assertIsNotNone(signal)
-        self.assertEqual(signal["direction"], "UP")
+        self.assertEqual(signal["direction"], "BUY")
         self.assertIn("sl", signal)
         self.assertIn("tp", signal)
         self.assertGreater(signal["tp"], signal["entry_price"])

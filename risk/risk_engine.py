@@ -15,7 +15,7 @@ class RiskEngine:
         return True
 
     def calculate_sl_tp(self, direction, entry_price, pb_extreme):
-        if direction == "UP":
+        if direction == "BUY":
             sl = pb_extreme - pips_to_price(0.5)
             # If risk is too small (< 4 pips), use fallback (6.5 pips)
             if price_to_pips(entry_price - sl) < 4.0:
@@ -35,7 +35,7 @@ class RiskEngine:
         return sl, tp
 
     def should_move_to_be(self, direction, entry_price, current_price):
-        if direction == "UP":
+        if direction == "BUY":
             profit_pips = price_to_pips(current_price - entry_price)
         else:
             profit_pips = price_to_pips(entry_price - current_price)

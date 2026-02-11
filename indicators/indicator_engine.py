@@ -1,5 +1,5 @@
 class IndicatorEngine:
-    def __init__(self, ema_period=20, slope_lookback=10, range_lookback=20):
+    def __init__(self, ema_period=20, slope_lookback=11, range_lookback=20):
         self.ema_period = ema_period
         self.slope_lookback = slope_lookback
         self.range_lookback = range_lookback
@@ -32,9 +32,11 @@ class IndicatorEngine:
         if len(self.ema_values) > self.max_history:
             self.ema_values.pop(0)
 
-        # EMA slope
+        # EMA slope (README Section 1: EMA(now) - EMA(10 candles ago))
+        # To get 10 candles delta, we need current EMA and the EMA from 10 steps ago.
+        # This requires 11 values in total.
         ema_slope = None
-        if len(self.ema_values) > self.slope_lookback:
+        if len(self.ema_values) >= self.slope_lookback:
             ema_slope = ema - self.ema_values[-self.slope_lookback]
 
         # Average range (volatility filter)

@@ -1,23 +1,28 @@
 from datetime import datetime, time, timedelta, timezone  # ✅ FIXED: Added timezone import
 
-def get_ist_time():
+def get_ist_time(dt=None):
     """
-    Get current time in IST (Indian Standard Time).
+    Get IST (Indian Standard Time) from a given datetime or current time.
     IST is UTC + 5:30
-    
-    ✅ FIXED: Changed from deprecated datetime.utcnow() to datetime.now(timezone.utc)
     """
-    return datetime.now(timezone.utc) + timedelta(hours=5, minutes=30)
+    if dt is None:
+        dt = datetime.now(timezone.utc)
 
-def is_session_active() -> bool:
+    # If dt is naive, assume it's UTC
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+
+    return dt.astimezone(timezone(timedelta(hours=5, minutes=30)))
+
+def is_session_active(dt=None) -> bool:
     """
-    Check if current time falls within tradeable sessions.
+    Check if given datetime (or current time) falls within tradeable sessions.
     
     Trading Sessions (IST):
     - London: 12:30 - 16:30
     - New York: 18:30 - 21:30
     """
-    now_ist = get_ist_time().time()
+    now_ist = get_ist_time(dt).time()
 
     london_start = time(12, 30)
     london_end = time(16, 30)
