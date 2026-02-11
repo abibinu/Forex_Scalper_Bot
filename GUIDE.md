@@ -84,4 +84,39 @@ The bot includes several features specifically for live deployment:
 
 ---
 
-**Warning**: Trading involves risk. Always run the bot on a Demo account for at least 2 weeks before moving to live funds.
+## 🚀 Process for Real Trading
+
+Follow these steps to deploy the bot in a production environment:
+
+### 1. Environment Setup
+- **OS**: Windows (Required for MetaTrader 5 terminal).
+- **Python**: 3.10+ installed.
+- **Dependencies**: Install via `pip install -r requirements.txt`.
+
+### 2. MetaTrader 5 Configuration
+1.  **Terminal**: Open your MT5 terminal and login to your broker (IC Markets Raw Spread recommended).
+2.  **Algo Trading**: Ensure the "Algo Trading" button is toggled ON (Green).
+3.  **Permissions**:
+    *   Go to `Tools -> Options -> Expert Advisors`.
+    *   Check `Allow Algorithmic Trading`.
+    *   Check `Allow DLL imports`.
+4.  **Market Watch**: Add `EURUSD` to your Market Watch window.
+
+### 3. Bot Configuration
+- Open `main.py` and verify the `volume` (lot size). Default is `0.1`.
+- Ensure your system clock is accurate (the bot uses IST for session filtering).
+
+### 4. Running the Bot
+Open a terminal in the project root and run:
+```bash
+python main.py
+```
+
+### 5. Monitoring
+- **Logs**: Monitor `bot.log` for real-time execution details.
+- **Visuals**: The bot does not draw on the MT5 chart, but you will see trades appearing in the `Trade` tab.
+- **Emergency Stop**: Press `Ctrl+C` in the terminal to safely shut down. The bot will attempt to log summary stats before exiting.
+
+---
+
+**Warning**: Trading involves significant risk. Always run the bot on a **Demo account** for at least 2-4 weeks to understand its behavior under various market conditions before moving to live funds.
