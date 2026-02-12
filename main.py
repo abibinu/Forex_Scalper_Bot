@@ -40,7 +40,7 @@ def setup_logging(config):
 
     # Remove default handlers if any
     if logger.hasHandlers() and len(logger.handlers) > 2:
-         logger.handlers = [file_handler, console_handler]
+        logger.handlers = [file_handler, console_handler]
 
 class VolmanTradingBot:
     def __init__(self, config=None, config_path="config/settings.yaml"):

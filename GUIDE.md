@@ -122,19 +122,25 @@ Follow these steps to deploy the bot in a production environment:
 4.  **Market Watch**: Add `EURUSD` to your Market Watch window.
 
 ### 3. Bot Configuration
-- Open `main.py` and verify the `volume` (lot size). Default is `0.1`.
+- Open `config/settings.yaml` and enter your MT5 credentials (`login`, `password`, `server`).
+- Adjust the `volume` (lot size) and other risk parameters as needed.
 - Ensure your system clock is accurate (the bot uses IST for session filtering).
 
 ### 4. Running the Bot
-Open a terminal in the project root and run:
-```bash
-python main.py
-```
+1.  **Health Check**: First, verify your setup and connection:
+    ```bash
+    python scripts/health_check.py
+    ```
+2.  **Start the Bot**:
+    ```bash
+    python main.py
+    ```
 
 ### 5. Monitoring
-- **Logs**: Monitor `bot.log` for real-time execution details.
+- **Dashboard**: The console provides a real-time dashboard showing account balance, equity, margin, and current strategy state.
+- **Logs**: Detailed execution logs are saved in `logs/volman_bot.log` (rotating daily).
 - **Visuals**: The bot does not draw on the MT5 chart, but you will see trades appearing in the `Trade` tab.
-- **Emergency Stop**: Press `Ctrl+C` in the terminal to safely shut down. The bot will attempt to log summary stats before exiting.
+- **Emergency Stop**: Press `Ctrl+C` in the terminal to safely shut down. The bot will close the MT5 connection gracefully.
 
 ---
 

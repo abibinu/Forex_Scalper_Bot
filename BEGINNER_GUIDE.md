@@ -58,13 +58,22 @@ To trade for real, you need two things: **Windows** and **MetaTrader 5 (MT5)**.
     - Check the box: `Allow DLL imports`.
 4.  **Market Watch**: Ensure `EURUSD` is visible in the list on the left.
 
-### Step C: Start the Bot
+### Step C: Configuration
+1.  **Open the folder** `config` and open the file `settings.yaml` with Notepad.
+2.  **Enter your details**: Put your MT5 Account Number, Password, and Server name in the file.
+3.  **Save the file**.
+
+### Step D: Start the Bot
 1.  **Open your terminal** in this folder.
-2.  **Type this command**:
+2.  **Check Connection**: Type this to make sure everything is correct:
+    ```bash
+    python scripts/health_check.py
+    ```
+3.  **Run the Bot**: If the check above is green, type:
     ```bash
     python main.py
     ```
-3.  **Watch it work**: The bot will connect to MT5. It will say "MT5 connected successfully."
+4.  **Watch it work**: You will see a **Dashboard** in the console showing your balance, margin, and what the bot is doing!
 
 ---
 

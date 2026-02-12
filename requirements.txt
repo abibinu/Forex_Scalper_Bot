@@ -8,6 +8,6 @@ pandas>=2.0.0
 # Testing
 pytest>=7.4.0
 
-# Optional: For advanced features
-pyyaml>=6.0  # If you want to use config/settings.yaml
+# Required for production
+pyyaml>=6.0
 python-dateutil>=2.8.2
