@@ -71,7 +71,7 @@ class VolmanTradingBot:
         self.tick_engine = TickCandleEngine(70)
         self.ind_engine = IndicatorEngine()
         self.risk_engine = RiskEngine(max_trades_session=5, max_consecutive_losses=3)
-        self.strategy_engine = StrategyEngine(self.risk_engine)
+        self.strategy_engine = StrategyEngine(self.risk_engine, symbol=self.symbol)
         self.exec_engine = ExecutionEngine(self.mt5)
         self.session_start_time = datetime.now()
         self.last_stats_log = datetime.now()
@@ -114,7 +114,7 @@ class VolmanTradingBot:
                 if candle:
                     indicators = self.ind_engine.update(candle)
                     self.last_indicators = indicators
-                    signal = self.strategy_engine.process_candle(candle, indicators)
+                    signal = self.strategy_engine.process_candle(candle, indicators, spread_pips=spread_pips)
                     if signal:
                         self._handle_signal(signal)
                     self.exec_engine.update_candles_count()

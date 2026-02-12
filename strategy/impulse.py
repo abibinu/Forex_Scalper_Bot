@@ -40,14 +40,14 @@ class ImpulseDetector:
             if overlap > self.max_overlap:
                 continue
 
-            direction = "UP" if close_price > open_price else "DOWN"
+            direction = "BUY" if close_price > open_price else "SELL"
 
             # Additional check: Directional closes
             up_closes = sum(1 for c in leg if c["close"] > c["open"])
             down_closes = sum(1 for c in leg if c["close"] < c["open"])
 
-            if direction == "UP" and up_closes < n * 0.6: continue
-            if direction == "DOWN" and down_closes < n * 0.6: continue
+            if direction == "BUY" and up_closes < n * 0.6: continue
+            if direction == "SELL" and down_closes < n * 0.6: continue
 
             return {
                 "direction": direction,

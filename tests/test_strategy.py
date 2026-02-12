@@ -50,11 +50,11 @@ class TestStrategyModules(unittest.TestCase):
             })
         res = self.impulse.detect(candles)
         self.assertIsNotNone(res)
-        self.assertEqual(res["direction"], "UP")
+        self.assertEqual(res["direction"], "BUY")
         self.assertGreaterEqual(res["size"], 8.0)
 
     def test_pullback_qualify(self):
-        impulse = {"direction": "UP", "high": 1.1010, "low": 1.1000, "avg_body": 0.0002}
+        impulse = {"direction": "BUY", "high": 1.1010, "low": 1.1000, "avg_body": 0.0002}
         pb_candles = [
             {"open": 1.1010, "close": 1.10095, "high": 1.1010, "low": 1.1009},
             {"open": 1.1009, "close": 1.10085, "high": 1.1009, "low": 1.1007}
@@ -67,7 +67,7 @@ class TestStrategyModules(unittest.TestCase):
         self.assertEqual(self.risk.trades_this_session, 1)
         entry = 1.1010
         pb_extreme = 1.1005
-        sl, tp = self.risk.calculate_sl_tp("UP", entry, pb_extreme)
+        sl, tp = self.risk.calculate_sl_tp("BUY", entry, pb_extreme)
         expected_sl = pb_extreme - pips_to_price(0.5)
         self.assertAlmostEqual(sl, expected_sl, places=5)
         risk = entry - sl

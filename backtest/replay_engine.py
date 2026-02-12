@@ -15,7 +15,7 @@ class ReplayEngine:
         self.tick_engine = TickCandleEngine(70)
         self.ind_engine = IndicatorEngine()
         self.risk_engine = RiskEngine()
-        self.strategy_engine = StrategyEngine(self.risk_engine)
+        self.strategy_engine = StrategyEngine(self.risk_engine, symbol=self.symbol)
         self.exec_engine = ExecutionEngine(self.mock_mt5)
         self.last_indicators = {}
         self.completed_trades = []
@@ -35,7 +35,8 @@ class ReplayEngine:
             if candle:
                 indicators = self.ind_engine.update(candle)
                 self.last_indicators = indicators
-                signal = self.strategy_engine.process_candle(candle, indicators)
+                spread_pips = price_to_pips(tick["ask"] - tick["bid"], self.symbol)
+                signal = self.strategy_engine.process_candle(candle, indicators, spread_pips=spread_pips)
                 if signal: self._handle_signal(signal)
                 self.exec_engine.update_candles_count()
             self.exec_engine.manage_trades(self.symbol, self.risk_engine)
@@ -58,8 +59,8 @@ class ReplayEngine:
 
     def _record_closed_trade_from_history(self, ticket, trade, reason=None):
         entry_price = trade["entry_price"]
-        exit_price = self.mock_mt5.current_tick["bid"] if trade["direction"] == "UP" else self.mock_mt5.current_tick["ask"]
-        if trade["direction"] == "UP": profit_pips = price_to_pips(exit_price - entry_price, self.symbol)
+        exit_price = self.mock_mt5.current_tick["bid"] if trade["direction"] == "BUY" else self.mock_mt5.current_tick["ask"]
+        if trade["direction"] == "BUY": profit_pips = price_to_pips(exit_price - entry_price, self.symbol)
         else: profit_pips = price_to_pips(entry_price - exit_price, self.symbol)
         self.completed_trades.append({"ticket": ticket, "profit": profit_pips, "reason": reason or trade.get("exit_reason", "UNKNOWN"), "direction": trade["direction"]})
 

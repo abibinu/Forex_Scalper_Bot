@@ -6,9 +6,11 @@ from strategy.structure import StructureMonitor
 from strategy.entry import EntryTrigger
 from utils.pip_utils import price_to_pips
 from utils.news_filter import NewsFilter
+from utils.time_utils import is_session_active
 
 class StrategyEngine:
-    def __init__(self, risk_engine):
+    def __init__(self, risk_engine, symbol="EURUSD"):
+        self.symbol = symbol
         self.news_filter = NewsFilter()
         self.trend_analyzer = TrendAnalyzer()
         self.impulse_detector = ImpulseDetector()
@@ -21,13 +23,17 @@ class StrategyEngine:
         self.state = "SEARCHING"
         self.current_setup = None
 
-    def process_candle(self, candle, indicators):
+    def process_candle(self, candle, indicators, spread_pips=None):
         self.candles.append(candle)
         if len(self.candles) > 100:
             self.candles.pop(0)
 
         # Update trend analyzer structure
         self.trend_analyzer.update(candle)
+
+        # 0. Spread Filter (README Section 6)
+        if spread_pips is not None and spread_pips > 0.8:
+            return None
 
         # 1. Volatility Filter
         avg_range = indicators.get("avg_range")
@@ -51,7 +57,12 @@ class StrategyEngine:
 
     def _handle_searching(self, candle, indicators):
         # 0. News Filter
-        if self.news_filter.is_news_active(candle.get("timestamp_open")):
+        timestamp = candle.get("timestamp_open") or candle.get("timestamp")
+        if self.news_filter.is_news_active(timestamp):
+            return None
+
+        # 0.1 Session Filter (README Section 13)
+        if not is_session_active(timestamp):
             return None
 
         # Qualify Trend
@@ -64,7 +75,7 @@ class StrategyEngine:
         # Detect Impulse
         impulse = self.impulse_detector.detect(self.candles)
         if impulse:
-            if (uptrend and impulse["direction"] == "UP") or (downtrend and impulse["direction"] == "DOWN"):
+            if (uptrend and impulse["direction"] == "BUY") or (downtrend and impulse["direction"] == "SELL"):
                 logging.info(f"Impulse detected: {impulse['direction']} size {impulse['size']:.1f} pips")
                 self.current_setup = {
                     "impulse": impulse,
@@ -80,7 +91,7 @@ class StrategyEngine:
         setup["pb_candles"].append(candle)
 
         # Check if trend still valid
-        trend_valid = self.trend_analyzer.qualify_uptrend(candle, indicators) if setup["direction"] == "UP" else self.trend_analyzer.qualify_downtrend(candle, indicators)
+        trend_valid = self.trend_analyzer.qualify_uptrend(candle, indicators) if setup["direction"] == "BUY" else self.trend_analyzer.qualify_downtrend(candle, indicators)
         if not trend_valid:
             logging.info("Trend invalidated during pullback. Resetting.")
             self.reset_state()
@@ -91,7 +102,7 @@ class StrategyEngine:
             logging.info(f"Pullback qualified for {setup['direction']} setup.")
 
             # Prepare trigger info
-            if setup["direction"] == "UP":
+            if setup["direction"] == "BUY":
                 trigger_price = max(c["high"] for c in setup["pb_candles"])
                 # Use a small buffer for invalidation to avoid premature reset
                 invalidation_price = min(c["low"] for c in setup["pb_candles"]) - 0.00005
@@ -127,8 +138,24 @@ class StrategyEngine:
         if self.state != "WAITING_TRIGGER" or not self.current_setup:
             return None
 
+        # 0. Spread Filter (README Section 6)
+        spread_pips = price_to_pips(tick["ask"] - tick["bid"], self.symbol)
+        if spread_pips > 0.8:
+            return None
+
+        # 0.1 Session Filter
+        if not is_session_active(tick["timestamp"]):
+            return None
+
         setup = self.current_setup
-        price = (tick["bid"] + tick["ask"]) / 2
+        # Use bid/ask for more accurate execution (README Section 5/6)
+        # BUY trigger: ask must break level
+        # SELL trigger: bid must break level
+        if setup["direction"] == "BUY":
+            price = tick["ask"]
+        else:
+            price = tick["bid"]
+
         tick_candle = {"high": price, "low": price, "close": price}
         return self._check_entry_trigger(tick_candle, setup)
 
