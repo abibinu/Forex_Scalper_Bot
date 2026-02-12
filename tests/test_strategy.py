@@ -70,10 +70,10 @@ class TestStrategyModules(unittest.TestCase):
         expected_sl = pb_extreme - pips_to_price(0.5)
         self.assertAlmostEqual(sl, expected_sl, places=5)
         risk = entry - sl
-        expected_tp = entry + (risk * 1.2)
+        expected_tp = entry + (risk * 1.5)
         self.assertAlmostEqual(tp, expected_tp, places=5)
         actual_rr = (tp - entry) / (entry - sl)
-        self.assertAlmostEqual(actual_rr, 1.2, places=2)
+        self.assertAlmostEqual(actual_rr, 1.5, places=2)
 
 if __name__ == "__main__":
     unittest.main()

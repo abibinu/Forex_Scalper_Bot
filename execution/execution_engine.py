@@ -48,7 +48,7 @@ class ExecutionEngine:
             if not trade["be_moved"]:
                 if risk_engine.should_move_to_be(trade["direction"], trade["entry_price"], current_price):
                     if self.mt5.modify_sl(ticket, trade["entry_price"]): trade["be_moved"] = True
-            if trade["candles_held"] >= 15:
+            if trade["candles_held"] >= 30:
                 if self.mt5.close_position(ticket):
                     if not trade["result_registered"]:
                         win = trade["tp_touched"]

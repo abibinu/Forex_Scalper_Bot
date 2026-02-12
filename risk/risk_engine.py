@@ -15,6 +15,10 @@ class RiskEngine:
         return True
 
     def calculate_sl_tp(self, direction, entry_price, pb_extreme):
+        """
+        Calculates SL and TP based on structural extremes with fallbacks.
+        TP adjusted to 1.5 RR for better profitability in 2026 conditions.
+        """
         if direction == "BUY":
             sl = pb_extreme - pips_to_price(0.5)
             # If risk is too small (< 4 pips), use fallback (6.5 pips)
@@ -22,7 +26,7 @@ class RiskEngine:
                 sl = entry_price - pips_to_price(6.5)
 
             risk = entry_price - sl
-            tp = entry_price + (risk * 1.2)
+            tp = entry_price + (risk * 1.5)  # Increased from 1.2
         else:
             sl = pb_extreme + pips_to_price(0.5)
             # If risk is too small (< 4 pips), use fallback (6.5 pips)
@@ -30,17 +34,21 @@ class RiskEngine:
                 sl = entry_price + pips_to_price(6.5)
 
             risk = sl - entry_price
-            tp = entry_price - (risk * 1.2)
+            tp = entry_price - (risk * 1.5)  # Increased from 1.2
 
         return sl, tp
 
     def should_move_to_be(self, direction, entry_price, current_price):
+        """
+        Moves SL to BE when profit reaches 7.0 pips.
+        Increased from 5.0 to allow more 'breathing room' for the 1.5 RR target.
+        """
         if direction == "BUY":
             profit_pips = price_to_pips(current_price - entry_price)
         else:
             profit_pips = price_to_pips(entry_price - current_price)
 
-        return profit_pips >= 5.0
+        return profit_pips >= 7.0
 
     def register_new_trade(self):
         self.trades_this_session += 1
