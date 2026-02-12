@@ -2,15 +2,15 @@ import logging
 from utils.pip_utils import price_to_pips, pips_to_price
 
 class PullbackQualifier:
-    def __init__(self, min_candles=2, max_candles=5, min_depth=0.25, max_depth=0.65, ema_buffer=2.5):
+    def __init__(self, min_candles=2, max_candles=10, min_depth=0.15, max_depth=0.75, ema_buffer=2.5):
         """
-        Pullback qualification with BALANCED settings optimized for real EURUSD 70-tick data
+        Pullback qualification with RELAXED settings to increase trade frequency
         
         Changes from original:
-        - min_depth: 0.3 → 0.25 (allow slightly shallower pullbacks)
-        - max_depth: 0.6 → 0.65 (allow slightly deeper pullbacks)  
-        - ema_buffer: 1.5 → 2.5 (more tolerance for EMA distance)
-        - wick_tolerance: 2.0 → 4.0 pips (realistic for Feb 2026 market conditions)
+        - min_depth: 0.25 → 0.15 (allow shallower pullbacks)
+        - max_depth: 0.65 → 0.75 (allow deeper pullbacks)
+        - max_candles: 5 → 10 (allow longer pullbacks)
+        - wick_tolerance: 4.0 → 7.0 pips
         """
         self.min_candles = min_candles
         self.max_candles = max_candles
@@ -32,19 +32,19 @@ class PullbackQualifier:
             current_low = min(c["low"] for c in pb_candles)
             depth = (impulse["high"] - current_low) / impulse_range
 
-            # UPDATED: Structure check with 4-pip tolerance (was 2 pips)
+            # UPDATED: Structure check with 7-pip tolerance (was 4 pips)
             # Real market data shows 3-8 pip overshoots are normal in 70-tick charts
             max_pb_high = max(c["high"] for c in pb_candles)
-            wick_tolerance = pips_to_price(4.0)  # CHANGED from 2.0
+            wick_tolerance = pips_to_price(7.0)  # RELAXED from 4.0
             
             if max_pb_high > impulse["high"] + wick_tolerance:
                 overshoot = price_to_pips(max_pb_high - impulse["high"])
                 logging.info(f"PB Qualification: excessive new high (+{overshoot:.1f} pips)")
                 return False
             
-            # But BODY must not exceed impulse high
+            # But BODY must not exceed impulse high (+0.5 pip buffer)
             max_pb_close = max(c["close"] for c in pb_candles)
-            if max_pb_close > impulse["high"]:
+            if max_pb_close > impulse["high"] + pips_to_price(0.5):
                 logging.info(f"PB Qualification: body close above impulse high")
                 return False
                 
@@ -52,18 +52,18 @@ class PullbackQualifier:
             current_high = max(c["high"] for c in pb_candles)
             depth = (current_high - impulse["low"]) / impulse_range
 
-            # UPDATED: 4-pip tolerance for SELL setups too
+            # UPDATED: 7-pip tolerance for SELL setups too
             min_pb_low = min(c["low"] for c in pb_candles)
-            wick_tolerance = pips_to_price(4.0)  # CHANGED from 2.0
+            wick_tolerance = pips_to_price(7.0)  # RELAXED from 4.0
             
             if min_pb_low < impulse["low"] - wick_tolerance:
                 overshoot = price_to_pips(impulse["low"] - min_pb_low)
                 logging.info(f"PB Qualification: excessive new low (-{overshoot:.1f} pips)")
                 return False
             
-            # But BODY must not exceed impulse low
+            # But BODY must not exceed impulse low (-0.5 pip buffer)
             min_pb_close = min(c["close"] for c in pb_candles)
-            if min_pb_close < impulse["low"]:
+            if min_pb_close < impulse["low"] - pips_to_price(0.5):
                 logging.info(f"PB Qualification: body close below impulse low")
                 return False
 
@@ -92,11 +92,11 @@ class PullbackQualifier:
                 logging.info(f"PB Qualification: not near EMA (closest: {price_to_pips(closest_dist):.1f} pips)")
                 return False
 
-        # Body Behavior
+        # Body Behavior - RELAXED from 0.7 to 0.9
         pb_avg_body = sum(abs(c["close"] - c["open"]) for c in pb_candles) / n
         impulse_avg_body = impulse.get("avg_body", 0)
         
-        if impulse_avg_body > 0 and pb_avg_body >= 0.7 * impulse_avg_body:
+        if impulse_avg_body > 0 and pb_avg_body >= 0.9 * impulse_avg_body:
             logging.info(f"PB Qualification: body too large (pb:{pb_avg_body:.5f} vs imp:{impulse_avg_body:.5f})")
             return False
 

@@ -116,8 +116,8 @@ class StrategyEngine:
             self.state = "WAITING_TRIGGER"
             setup["trigger_start_index"] = candle["index"]
 
-        elif len(setup["pb_candles"]) > 5:
-            logging.info("Pullback too long. Resetting.")
+        elif len(setup["pb_candles"]) > self.pullback_qualifier.max_candles:
+            logging.info(f"Pullback too long ({len(setup['pb_candles'])} candles). Resetting.")
             self.reset_state()
 
         return None

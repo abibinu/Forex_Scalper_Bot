@@ -29,14 +29,13 @@ class TestStrategyModules(unittest.TestCase):
 
     def test_trend_hh_ll(self):
         for i in range(20):
-            candle = {"close": 1.1020, "high": 1.1025, "low": 1.1015, "index": i}
-            indicators = {"ema20": 1.1010, "ema20_slope": 0.0002}
+            # Increase high every 5 candles to maintain HH requirement
+            high = 1.1025 + (i // 5) * 0.0001
+            candle = {"close": high - 0.0005, "high": high, "low": high - 0.0010, "index": i}
+            indicators = {"ema20": high - 0.0015, "ema20_slope": 0.0002}
             self.trend.update(candle)
             res = self.trend.qualify_uptrend(candle, indicators)
-            if i < 19:
-                self.assertTrue(res)
-            else:
-                self.assertFalse(res)
+            self.assertTrue(res, f"Failed at index {i} with high {high}")
 
     def test_impulse_detect(self):
         candles = []

@@ -1,8 +1,8 @@
 import logging
-from utils.pip_utils import price_to_pips
+from utils.pip_utils import price_to_pips, pips_to_price
 
 class TrendAnalyzer:
-    def __init__(self, ema_slope_threshold=1.5):
+    def __init__(self, ema_slope_threshold=1.0):
         self.ema_slope_threshold = ema_slope_threshold
         self.highs = []
         self.lows = []
@@ -24,9 +24,9 @@ class TrendAnalyzer:
         if ema is None or slope is None:
             return False
 
-        # 1. Price above EMA
-        if candle["close"] <= ema:
-            logging.debug(f"Trend Analysis: Price {candle['close']} <= EMA {ema}")
+        # 1. Price above EMA (with 1.0 pip buffer to allow minor pierces)
+        if candle["close"] < ema - pips_to_price(1.0):
+            logging.debug(f"Trend Analysis: Price {candle['close']} < EMA {ema} - buffer")
             return False
 
         # 2. EMA sloping upward
@@ -54,9 +54,9 @@ class TrendAnalyzer:
         if ema is None or slope is None:
             return False
 
-        # 1. Price below EMA
-        if candle["close"] >= ema:
-            logging.debug(f"Trend Analysis: Price {candle['close']} >= EMA {ema}")
+        # 1. Price below EMA (with 1.0 pip buffer)
+        if candle["close"] > ema + pips_to_price(1.0):
+            logging.debug(f"Trend Analysis: Price {candle['close']} > EMA {ema} + buffer")
             return False
 
         # 2. EMA sloping downward

@@ -2,20 +2,15 @@ import logging
 from utils.pip_utils import pips_to_price, price_to_pips
 
 class StructureMonitor:
-    def __init__(self, ema_buffer_pips=1.0, structure_buffer_pips=3.0):
+    def __init__(self, ema_buffer_pips=2.0, structure_buffer_pips=5.0):
         """
-        Structure monitoring with BALANCED settings for real EURUSD 70-tick data
+        Structure monitoring with RELAXED settings for real EURUSD 70-tick data
         
-        CRITICAL CHANGE: structure_buffer_pips 1.5 → 3.0
+        CRITICAL CHANGE: structure_buffer_pips 3.0 → 5.0, ema_buffer 1.0 -> 2.0
         
         Reason: Real market data from Feb 2026 shows 2-4 pip wicks below pullback 
-        lows are NORMAL behavior in 70-tick charts. The original 1.5 pip buffer was 
-        invalidating 100% of setups. 3.0 pips provides realistic tolerance while 
-        still protecting against true structure breaks.
-        
-        Analysis from backtest showed:
-        - Setup #1: Breached by 3.7 pips (would pass with 3.0, rejected with 1.5)
-        - Setup #2: Breached by 2.2 pips (would pass with 3.0, rejected with 1.5)
+        lows are NORMAL behavior in 70-tick charts. RELAXED settings allow
+        more trades to survive minor volatility spikes.
         """
         self.ema_buffer_pips = ema_buffer_pips
         self.structure_buffer_pips = structure_buffer_pips
