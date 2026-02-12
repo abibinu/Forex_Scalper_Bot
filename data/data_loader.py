@@ -32,7 +32,7 @@ class DataLoader:
         utc_from = utc_to - timedelta(days=days)
 
         # Requesting ticks
-        ticks = mt5.copy_ticks_from(symbol, utc_from, mt5.COPY_TICKS_ALL)
+        ticks = mt5.copy_ticks_range(symbol, utc_from, utc_to, mt5.COPY_TICKS_ALL)
 
         if ticks is None:
             logging.error(f"Failed to download ticks: {mt5.last_error()}")
