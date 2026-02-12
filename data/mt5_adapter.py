@@ -4,17 +4,32 @@ import logging
 
 
 class MT5Adapter:
-    def __init__(self):
+    def __init__(self, magic=701970):
         self.connected = False
+        self.magic = magic
 
-    def connect(self, login=None, password=None, server=None) -> bool:
+    def connect(self, login=None, password=None, server=None, magic=None) -> bool:
+        if magic is not None:
+            self.magic = magic
+
         if login and password and server:
-            init_res = mt5.initialize(login=login, password=password, server=server)
+            logging.info(f"Attempting MT5 connection with login {login} on server {server}...")
+            init_res = mt5.initialize(login=int(login), password=str(password), server=str(server))
         else:
+            logging.info("Attempting MT5 connection to active terminal...")
             init_res = mt5.initialize()
 
         if not init_res:
-            logging.error(f"MT5 initialize failed: {mt5.last_error()}")
+            err = mt5.last_error()
+            logging.error(f"MT5 initialize failed: {err}")
+
+            # Fallback: if credentials were provided but failed, try connecting to active terminal
+            if login and password and server:
+                logging.info("Falling back to active terminal connection...")
+                if mt5.initialize():
+                    self.connected = True
+                    logging.info("MT5 connected successfully to active terminal")
+                    return True
             return False
 
         self.connected = True
@@ -85,7 +100,7 @@ class MT5Adapter:
             "sl": sl,
             "tp": tp,
             "deviation": 2,
-            "magic": 701970,
+            "magic": self.magic,
             "comment": comment,
             "type_time": mt5.ORDER_TIME_GTC,
             "type_filling": mt5.ORDER_FILLING_IOC,
@@ -136,7 +151,7 @@ class MT5Adapter:
             "type": direction,
             "price": price,
             "deviation": 2,
-            "magic": 701970,
+            "magic": self.magic,
             "comment": "Close by bot",
             "type_time": mt5.ORDER_TIME_GTC,
             "type_filling": mt5.ORDER_FILLING_IOC,

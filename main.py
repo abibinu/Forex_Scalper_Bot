@@ -117,9 +117,15 @@ class VolmanTradingBot:
         login = self.config['mt5'].get('login')
         password = self.config['mt5'].get('password')
         server = self.config['mt5'].get('server')
+        magic = self.config['mt5'].get('magic', 701970)
 
-        if not self.mt5.connect(login=login, password=password, server=server):
-            logging.error("Failed to connect to MT5 with provided credentials")
+        # Handle optional credentials or placeholders
+        if login == 0 or login == 12345678 or not login:
+            logging.info("MT5 login not provided or using default. Attempting to use active terminal session.")
+            login = password = server = None
+
+        if not self.mt5.connect(login=login, password=password, server=server, magic=magic):
+            logging.error("Failed to connect to MT5. Please ensure MT5 terminal is open and logged in.")
             return False
 
         # Use config values instead of hardcoded ones

@@ -27,9 +27,16 @@ def run_health_check():
     login = config['mt5'].get('login')
     password = config['mt5'].get('password')
     server = config['mt5'].get('server')
+    magic = config['mt5'].get('magic', 701970)
 
-    print(f"📡 Attempting to connect to {server}...")
-    if adapter.connect(login=login, password=password, server=server):
+    # Handle optional credentials or placeholders
+    if login == 0 or login == 12345678 or not login:
+        print("📡 Attempting to connect to active MT5 terminal...")
+        login = password = server = None
+    else:
+        print(f"📡 Attempting to connect to {server} with account {login}...")
+
+    if adapter.connect(login=login, password=password, server=server, magic=magic):
         print("✅ MT5 Connection successful.")
 
         # 3. Check Account Info

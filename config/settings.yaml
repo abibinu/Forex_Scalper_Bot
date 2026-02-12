@@ -1,9 +1,9 @@
 # Volman 70 Tick Bot - Production Configuration
 
 mt5:
-  login: 12345678  # Your MT5 account number
-  password: "your_password"
-  server: "ICMarketsSC-Demo"
+  login: 0  # Your MT5 account number (Set to 0 to use already logged-in terminal)
+  password: ""  # Your MT5 password (Leave empty if already logged-in)
+  server: ""  # Your MT5 server name (Leave empty if already logged-in)
   magic: 701970
 
 trading:
