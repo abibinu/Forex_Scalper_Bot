@@ -2,15 +2,15 @@ import logging
 from utils.pip_utils import price_to_pips, pips_to_price
 
 class PullbackQualifier:
-    def __init__(self, min_candles=2, max_candles=10, min_depth=0.15, max_depth=0.75, ema_buffer=2.5):
+    def __init__(self, min_candles=2, max_candles=8, min_depth=0.20, max_depth=0.65, ema_buffer=2.0):
         """
-        Pullback qualification with RELAXED settings to increase trade frequency
+        Pullback qualification with tuned settings for better profitability.
         
-        Changes from original:
-        - min_depth: 0.25 → 0.15 (allow shallower pullbacks)
-        - max_depth: 0.65 → 0.75 (allow deeper pullbacks)
-        - max_candles: 5 → 10 (allow longer pullbacks)
-        - wick_tolerance: 4.0 → 7.0 pips
+        Tuned from:
+        - min_depth: 0.15 → 0.20
+        - max_depth: 0.75 → 0.65
+        - max_candles: 10 → 8
+        - wick_tolerance: 7.0 → 4.0 pips
         """
         self.min_candles = min_candles
         self.max_candles = max_candles
@@ -32,10 +32,9 @@ class PullbackQualifier:
             current_low = min(c["low"] for c in pb_candles)
             depth = (impulse["high"] - current_low) / impulse_range
 
-            # UPDATED: Structure check with 7-pip tolerance (was 4 pips)
-            # Real market data shows 3-8 pip overshoots are normal in 70-tick charts
+            # Structure check with 4-pip tolerance
             max_pb_high = max(c["high"] for c in pb_candles)
-            wick_tolerance = pips_to_price(7.0)  # RELAXED from 4.0
+            wick_tolerance = pips_to_price(4.0)
             
             if max_pb_high > impulse["high"] + wick_tolerance:
                 overshoot = price_to_pips(max_pb_high - impulse["high"])
@@ -52,9 +51,9 @@ class PullbackQualifier:
             current_high = max(c["high"] for c in pb_candles)
             depth = (current_high - impulse["low"]) / impulse_range
 
-            # UPDATED: 7-pip tolerance for SELL setups too
+            # 4-pip tolerance for SELL setups
             min_pb_low = min(c["low"] for c in pb_candles)
-            wick_tolerance = pips_to_price(7.0)  # RELAXED from 4.0
+            wick_tolerance = pips_to_price(4.0)
             
             if min_pb_low < impulse["low"] - wick_tolerance:
                 overshoot = price_to_pips(impulse["low"] - min_pb_low)
@@ -67,12 +66,12 @@ class PullbackQualifier:
                 logging.info(f"PB Qualification: body close below impulse low")
                 return False
 
-        # Depth check - UPDATED ranges (was 30-60%, now 25-65%)
+        # Depth check
         if not (self.min_depth <= depth <= self.max_depth):
             logging.info(f"PB Qualification: depth {depth:.1%} out of range [{self.min_depth:.0%}-{self.max_depth:.0%}]")
             return False
 
-        # EMA Interaction - UPDATED buffer (was 1.5 pips, now 2.5 pips)
+        # EMA Interaction
         ema = indicators.get("ema20")
         if ema:
             near_ema = False
@@ -92,11 +91,11 @@ class PullbackQualifier:
                 logging.info(f"PB Qualification: not near EMA (closest: {price_to_pips(closest_dist):.1f} pips)")
                 return False
 
-        # Body Behavior - RELAXED from 0.7 to 0.9
+        # Body Behavior - tightened to 0.8
         pb_avg_body = sum(abs(c["close"] - c["open"]) for c in pb_candles) / n
         impulse_avg_body = impulse.get("avg_body", 0)
         
-        if impulse_avg_body > 0 and pb_avg_body >= 0.9 * impulse_avg_body:
+        if impulse_avg_body > 0 and pb_avg_body >= 0.8 * impulse_avg_body:
             logging.info(f"PB Qualification: body too large (pb:{pb_avg_body:.5f} vs imp:{impulse_avg_body:.5f})")
             return False
 

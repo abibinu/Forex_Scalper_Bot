@@ -2,15 +2,17 @@ import logging
 from utils.pip_utils import pips_to_price, price_to_pips
 
 class StructureMonitor:
-    def __init__(self, ema_buffer_pips=2.0, structure_buffer_pips=5.0):
+    def __init__(self, ema_buffer_pips=1.0, structure_buffer_pips=1.5):
         """
-        Structure monitoring with RELAXED settings for real EURUSD 70-tick data
+        Structure monitoring with tuned settings for better profitability.
         
-        CRITICAL CHANGE: structure_buffer_pips 3.0 → 5.0, ema_buffer 1.0 -> 2.0
+        Tuned from:
+        - structure_buffer_pips: 5.0 → 1.5
+        - ema_buffer_pips: 2.0 → 1.0
         
-        Reason: Real market data from Feb 2026 shows 2-4 pip wicks below pullback 
-        lows are NORMAL behavior in 70-tick charts. RELAXED settings allow
-        more trades to survive minor volatility spikes.
+        Reason: Tightening structure prevents holding onto failing setups.
+        A breach of the pullback extreme by more than 1.5 pips usually signals
+        the end of the squeeze.
         """
         self.ema_buffer_pips = ema_buffer_pips
         self.structure_buffer_pips = structure_buffer_pips
