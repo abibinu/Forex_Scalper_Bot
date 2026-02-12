@@ -136,9 +136,15 @@ class ReplayEngine:
 
     def _record_closed_trade_from_history(self, ticket, trade, reason=None):
         entry_price = trade["entry_price"]
+        reason = reason or trade.get("exit_reason", "UNKNOWN")
         
-        # Use current tick for exit price
-        if self.mock_mt5.current_tick:
+        # Determine exit price based on reason
+        if reason == "SL":
+            exit_price = trade["sl"]
+        elif reason == "TP":
+            exit_price = trade["tp"]
+        elif self.mock_mt5.current_tick:
+            # For MARKET or TIME_STOP, use current tick price
             exit_price = self.mock_mt5.current_tick["bid"] if trade["direction"] == "BUY" else self.mock_mt5.current_tick["ask"]
         else:
             # Fallback to entry price if no tick available
