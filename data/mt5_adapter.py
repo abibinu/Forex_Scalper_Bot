@@ -159,3 +159,26 @@ class MT5Adapter:
 
         result = mt5.order_send(request)
         return result.retcode == mt5.TRADE_RETCODE_DONE
+
+    def get_position_outcome(self, ticket: int):
+        """
+        Retrieves the deal outcome (profit, exit price, win status) for a closed position
+        from the MT5 history deals.
+        """
+        import MetaTrader5 as mt5
+        # Fetch deals for the specific position ticket
+        deals = mt5.history_deals_get(position=ticket)
+        if not deals:
+            logging.warning(f"No history deals found for position {ticket}")
+            return None
+
+        total_profit = sum(d.profit for d in deals)
+        # Find the exit deal (entry OUT = 1 or IN/OUT = 2)
+        exit_deals = [d for d in deals if d.entry in (1, 2)]
+        exit_price = exit_deals[-1].price if exit_deals else None
+
+        return {
+            "profit": total_profit,
+            "exit_price": exit_price,
+            "win": total_profit > 0
+        }

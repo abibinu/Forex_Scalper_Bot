@@ -10,12 +10,37 @@ from utils.pip_utils import price_to_pips, pips_to_price
 
 class ReplayEngine:
     def __init__(self, symbol="EURUSD"):
+        import yaml
+        import os
+        
+        # Load config
+        config_path = "config/settings.yaml"
+        session_config = None
+        broker_gmt_offset = 2
+        max_spread_pips = 0.8
+        
+        if os.path.exists(config_path):
+            try:
+                with open(config_path, 'r') as f:
+                    cfg = yaml.safe_load(f)
+                    session_config = cfg.get("sessions")
+                    broker_gmt_offset = cfg.get("mt5", {}).get("broker_gmt_offset", 2)
+                    max_spread_pips = cfg.get("trading", {}).get("max_spread_pips", 0.8)
+            except Exception:
+                pass
+
         self.symbol = symbol
         self.mock_mt5 = MockMT5Adapter()
         self.tick_engine = TickCandleEngine(70)
         self.ind_engine = IndicatorEngine()
         self.risk_engine = RiskEngine()
-        self.strategy_engine = StrategyEngine(self.risk_engine, symbol=self.symbol)
+        self.strategy_engine = StrategyEngine(
+            self.risk_engine, 
+            symbol=self.symbol,
+            session_config=session_config,
+            broker_gmt_offset=broker_gmt_offset,
+            max_spread_pips=max_spread_pips
+        )
         self.exec_engine = ExecutionEngine(self.mock_mt5)
         self.last_indicators = {}
         self.completed_trades = []

@@ -1,6 +1,11 @@
 import argparse
 import logging
 import sys
+
+# Configure UTF-8 encoding for standard output on Windows
+if hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(encoding='utf-8')
+
 from backtest.replay_engine import ReplayEngine
 from data.data_loader import DataLoader
 

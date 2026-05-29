@@ -5,6 +5,7 @@ mt5:
   password: ""  # Your MT5 password (Leave empty if already logged-in)
   server: ""  # Your MT5 server name (Leave empty if already logged-in)
   magic: 701970
+  broker_gmt_offset: 2  # GMT offset of broker (EET/GMT+2 is standard for most brokers)
 
 trading:
   symbol: "EURUSD"
@@ -14,7 +15,16 @@ trading:
   max_consecutive_losses: 3
   stop_loss_fallback_pips: 6.5
   take_profit_multiplier: 1.2
-  max_spread_pips: 0.8
+  max_spread_pips: 1.5
+
+sessions:
+  use_session_filter: true
+  london:
+    start: "12:30"
+    end: "16:30"
+  new_york:
+    start: "18:30"
+    end: "21:30"
 
 logging:
   level: "INFO"

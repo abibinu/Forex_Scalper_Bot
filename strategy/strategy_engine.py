@@ -9,8 +9,11 @@ from utils.news_filter import NewsFilter
 from utils.time_utils import is_session_active
 
 class StrategyEngine:
-    def __init__(self, risk_engine, symbol="EURUSD"):
+    def __init__(self, risk_engine, symbol="EURUSD", session_config=None, broker_gmt_offset=0, max_spread_pips=0.8):
         self.symbol = symbol
+        self.session_config = session_config
+        self.broker_gmt_offset = broker_gmt_offset
+        self.max_spread_pips = max_spread_pips
         self.news_filter = NewsFilter()
         self.trend_analyzer = TrendAnalyzer()
         self.impulse_detector = ImpulseDetector()
@@ -32,7 +35,7 @@ class StrategyEngine:
         self.trend_analyzer.update(candle)
 
         # 0. Spread Filter (README Section 6)
-        if spread_pips is not None and spread_pips > 0.8:
+        if spread_pips is not None and spread_pips > self.max_spread_pips:
             return None
 
         # 1. Volatility Filter
@@ -58,11 +61,11 @@ class StrategyEngine:
     def _handle_searching(self, candle, indicators):
         # 0. News Filter
         timestamp = candle.get("timestamp_open") or candle.get("timestamp")
-        if self.news_filter.is_news_active(timestamp):
+        if self.news_filter.is_news_active(timestamp, broker_gmt_offset=self.broker_gmt_offset):
             return None
 
         # 0.1 Session Filter (README Section 13)
-        if not is_session_active(timestamp):
+        if not is_session_active(timestamp, session_config=self.session_config, broker_gmt_offset=self.broker_gmt_offset):
             return None
 
         # Qualify Trend
@@ -139,11 +142,11 @@ class StrategyEngine:
 
         # 0. Spread Filter (README Section 6)
         spread_pips = price_to_pips(tick["ask"] - tick["bid"], self.symbol)
-        if spread_pips > 0.8:
+        if spread_pips > self.max_spread_pips:
             return None
 
         # 0.1 Session Filter
-        if not is_session_active(tick["timestamp"]):
+        if not is_session_active(tick["timestamp"], session_config=self.session_config, broker_gmt_offset=self.broker_gmt_offset):
             return None
 
         setup = self.current_setup

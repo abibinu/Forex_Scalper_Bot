@@ -4,6 +4,13 @@ import yaml
 import os
 import signal
 import sys
+
+# Configure UTF-8 encoding for standard output/error on Windows
+if hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(encoding='utf-8')
+if hasattr(sys.stderr, 'reconfigure'):
+    sys.stderr.reconfigure(encoding='utf-8')
+
 from logging.handlers import TimedRotatingFileHandler
 from datetime import datetime
 from data.mt5_adapter import MT5Adapter
@@ -103,9 +110,10 @@ class VolmanTradingBot:
         logging.info(f"Consecutive Losses: {self.risk_engine.consecutive_losses}/{self.risk_engine.max_consecutive_losses}")
 
         if self.last_indicators:
-            ema = self.last_indicators.get('ema', 0)
-            slope = self.last_indicators.get('ema_slope', 0)
-            logging.info(f"EMA: {ema:.5f} | Slope: {slope:.2f}")
+            ema = self.last_indicators.get('ema20', 0)
+            slope = self.last_indicators.get('ema20_slope')
+            slope_str = f"{price_to_pips(slope, self.symbol):.2f}" if slope is not None else "N/A"
+            logging.info(f"EMA: {ema:.5f} | Slope: {slope_str} pips")
 
         logging.info("=" * 60)
     
@@ -134,13 +142,27 @@ class VolmanTradingBot:
         max_losses = self.config['trading'].get('max_consecutive_losses', 3)
         tp_multiplier = self.config['trading'].get('take_profit_multiplier', 1.5)
 
+        session_config = self.config.get('sessions')
+        broker_gmt_offset = self.config['mt5'].get('broker_gmt_offset', 2)
+        max_spread = self.config['trading'].get('max_spread_pips', 0.8)
+
         self.tick_engine = TickCandleEngine(tick_count)
         self.ind_engine = IndicatorEngine()
         self.risk_engine = RiskEngine(max_trades_session=max_trades, max_consecutive_losses=max_losses, tp_multiplier=tp_multiplier)
-        self.strategy_engine = StrategyEngine(self.risk_engine, symbol=self.symbol)
+        self.strategy_engine = StrategyEngine(
+            self.risk_engine, 
+            symbol=self.symbol, 
+            session_config=session_config, 
+            broker_gmt_offset=broker_gmt_offset,
+            max_spread_pips=max_spread
+        )
         self.exec_engine = ExecutionEngine(self.mt5)
         self.session_start_time = datetime.now()
         self.last_stats_log = datetime.now()
+
+        # Download weekly news calendar
+        logging.info("Downloading Forex Factory news calendar...")
+        self.strategy_engine.news_filter.fetch_calendar(symbol=self.symbol)
         return True
     
     def run(self):
@@ -155,36 +177,51 @@ class VolmanTradingBot:
         logging.info(f"Bot initialized and running for {self.symbol}")
         self.log_statistics()
 
-        try:
-            iteration = 0
-            while True:
-                iteration += 1
+        session_config = self.config.get('sessions')
+        broker_gmt_offset = self.config['mt5'].get('broker_gmt_offset', 2)
 
-                # Connection monitoring (every ~10 seconds assuming ~100ms per loop)
-                if iteration % 100 == 0:
+        last_conn_check = datetime.now()
+        last_heartbeat_check = datetime.now()
+
+        try:
+            while True:
+                now = datetime.now()
+
+                # Connection monitoring (every 10 seconds)
+                if (now - last_conn_check).total_seconds() > 10:
+                    last_conn_check = now
                     if not self.ensure_mt5_connected():
                          logging.error("Critical: MT5 Connection lost. Attempting to recover...")
                          time.sleep(10)
                          continue
 
-                # Tick heartbeat
-                if iteration % 500 == 0 and not self.check_tick_heartbeat():
-                    logging.warning("No ticks received for 30s. Market might be closed or connection stale.")
-                if (datetime.now() - self.last_stats_log).total_seconds() > 300:
+                # Tick heartbeat monitoring (every 30 seconds)
+                if (now - last_heartbeat_check).total_seconds() > 30:
+                    last_heartbeat_check = now
+                    if not self.check_tick_heartbeat():
+                        logging.warning("No ticks received for 30s. Market might be closed or connection stale.")
+
+                # Stats logging (every 5 minutes)
+                if (now - self.last_stats_log).total_seconds() > 300:
                     self.log_statistics()
-                    self.last_stats_log = datetime.now()
-                if not is_session_active():
+                    self.last_stats_log = now
+
+                # Session filter check
+                if not is_session_active(session_config=session_config, broker_gmt_offset=broker_gmt_offset):
                     time.sleep(30)
                     continue
+
                 try:
                     tick = self.mt5.get_tick(self.symbol)
                 except Exception as e:
                     logging.error(f"Error fetching tick: {e}")
                     tick = None
+
                 if not tick:
                     time.sleep(0.1)
                     continue
-                self.last_tick_time = datetime.now()
+
+                self.last_tick_time = now
                 spread_pips = price_to_pips(tick["spread"], self.symbol)
                 max_spread = self.config['trading'].get('max_spread_pips', 0.8)
                 if spread_pips > max_spread:
@@ -204,6 +241,7 @@ class VolmanTradingBot:
                     if trade_sig:
                         self._handle_signal(trade_sig)
                     self.exec_engine.update_candles_count()
+
                 self.exec_engine.manage_trades(self.symbol, self.risk_engine)
                 time.sleep(0.001)
         except KeyboardInterrupt:

@@ -3,6 +3,10 @@ import yaml
 import sys
 import os
 
+# Configure UTF-8 encoding for standard output on Windows
+if hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(encoding='utf-8')
+
 # Add parent directory to path to import local modules
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 

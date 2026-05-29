@@ -1,10 +1,10 @@
-# 📘 Volman Trend Pullback – 70 Tick Automation Model (2026 Edition)
+#  Volman Trend Pullback – 70 Tick Automation Model (2026 Edition)
 
 Automation‑ready scalping framework inspired by Bob Volman’s price action methodology, engineered for modern algo‑driven forex market conditions.
 
 ---
 
-# 🧠 Strategy Overview
+#  Strategy Overview
 
 **Model Type:** Trend Continuation Scalping  
 **Execution Style:** Pullback Breakout  
@@ -18,7 +18,7 @@ Automation‑ready scalping framework inspired by Bob Volman’s price action me
 
 ---
 
-# ⚙️ Market Environment (2026 Context)
+#  Market Environment (2026 Context)
 
 Modern forex microstructure characteristics:
 
@@ -36,7 +36,7 @@ This model is optimized to:
 
 ---
 
-# 🕒 Trading Sessions
+#  Trading Sessions
 
 Trade only during high liquidity windows.
 
@@ -53,7 +53,7 @@ Trade only during high liquidity windows.
 
 ---
 
-# 📊 Chart Specifications
+#  Chart Specifications
 
 - Chart Type: **70 Tick**
 - EMA: **20 Period**
@@ -62,7 +62,7 @@ Trade only during high liquidity windows.
 
 ---
 
-# 🔍 Strategy Logic Framework
+#  Strategy Logic Framework
 
 The setup consists of 3 structural phases:
 
@@ -72,7 +72,7 @@ The setup consists of 3 structural phases:
 
 ---
 
-# 1️⃣ Trend Qualification Rules
+#  Trend Qualification Rules
 
 ## Indicator
 
@@ -103,7 +103,7 @@ Flat EMA → No trade.
 
 ---
 
-# 2️⃣ Impulse Leg Detection
+#  Impulse Leg Detection
 
 Impulse confirms institutional activity.
 
@@ -127,7 +127,7 @@ Weak impulse → Ignore setup.
 
 ---
 
-# 3️⃣ Pullback Qualification
+#  Pullback Qualification
 
 Pullback represents liquidity refill.
 
@@ -184,7 +184,7 @@ Pullback avg body < 70% of impulse avg
 
 ---
 
-# 4️⃣ Structure Integrity Rule
+#  Structure Integrity Rule
 
 Trend structure must remain intact.
 
@@ -200,7 +200,7 @@ Opposite conditions.
 
 ---
 
-# 5️⃣ Entry Trigger Rules
+#  Entry Trigger Rules
 
 Continuation confirmation required.
 
@@ -228,7 +228,7 @@ Break of pullback low + 0.3 pip buffer
 
 ---
 
-# 6️⃣ Spread Filter
+#  Spread Filter
 
 Scalping viability depends on spread control.
 
@@ -240,7 +240,7 @@ Scalping viability depends on spread control.
 
 ---
 
-# 7️⃣ Stop Loss Model
+#  Stop Loss Model
 
 ## Structural SL (Primary)
 
@@ -268,7 +268,7 @@ Used when structural stop < 4 pips.
 
 ---
 
-# 8️⃣ Take Profit Model
+#  Take Profit Model
 
 ## Standard TP
 
@@ -292,7 +292,7 @@ RR = 1 : 1.2
 
 ---
 
-# 9️⃣ Trade Management Rules
+#  Trade Management Rules
 
 ## Break‑Even
 
@@ -321,7 +321,7 @@ No TP hit within 15 candles
 
 ---
 
-# 🔟 Volatility Filter
+#  Volatility Filter
 
 Minimum activity requirement:
 
@@ -333,7 +333,7 @@ Low volatility → Skip trades.
 
 ---
 
-# 1️⃣1️⃣ News Filter
+#  News Filter
 
 Block trading:
 
@@ -351,7 +351,7 @@ High‑impact examples:
 
 ---
 
-# 1️⃣2️⃣ Risk & Frequency Controls
+#  Risk & Frequency Controls
 
 - Max 5 trades per session
 - Max 3 consecutive losses
@@ -359,7 +359,7 @@ High‑impact examples:
 
 ---
 
-# 1️⃣3️⃣ Automation Execution Flow
+#  Automation Execution Flow
 
 ```
 Session active?
@@ -381,7 +381,7 @@ Manage SL/TP
 
 ---
 
-# 1️⃣4️⃣ A+ Setup Characteristics
+#  A+ Setup Characteristics
 
 Highest probability trades:
 
@@ -393,7 +393,7 @@ Highest probability trades:
 
 ---
 
-# 1️⃣5️⃣ Avoid Conditions
+#  Avoid Conditions
 
 Do NOT trade when:
 
@@ -406,7 +406,7 @@ Do NOT trade when:
 
 ---
 
-# 📈 Performance Expectations
+#  Performance Expectations
 
 | Metric | Range |
 |--------|-------|
@@ -418,7 +418,7 @@ Do NOT trade when:
 
 ---
 
-# 🖥️ Deployment Stack
+#  Deployment Stack
 
 Recommended environment:
 
@@ -430,7 +430,7 @@ Recommended environment:
 
 ---
 
-# 🚀 Roadmap Extensions
+#  Roadmap Extensions
 
 Planned automation modules:
 

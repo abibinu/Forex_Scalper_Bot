@@ -31,7 +31,12 @@ class ExecutionEngine:
         for ticket, trade in list(self.active_trades.items()):
             if not self.mt5.position_exists(ticket):
                 if not trade["result_registered"]:
-                    win = trade["tp_touched"]
+                    outcome = self.mt5.get_position_outcome(ticket)
+                    if outcome:
+                        win = outcome["win"]
+                        trade["exit_price"] = outcome.get("exit_price")
+                    else:
+                        win = trade["tp_touched"]
                     risk_engine.register_trade_result(win=win)
                     trade["result_registered"] = True
                 trade["exit_reason"] = "MARKET"
@@ -51,7 +56,12 @@ class ExecutionEngine:
             if trade["candles_held"] >= 30:
                 if self.mt5.close_position(ticket):
                     if not trade["result_registered"]:
-                        win = trade["tp_touched"]
+                        outcome = self.mt5.get_position_outcome(ticket)
+                        if outcome:
+                            win = outcome["win"]
+                            trade["exit_price"] = outcome.get("exit_price")
+                        else:
+                            win = trade["tp_touched"]
                         risk_engine.register_trade_result(win=win)
                         trade["result_registered"] = True
                     trade["exit_reason"] = "TIME_STOP"
@@ -63,6 +73,7 @@ class ExecutionEngine:
         for ticket, trade in list(self.active_trades.items()):
             if not self.mt5.position_exists(ticket):
                 if not trade["result_registered"]:
-                    win = trade["tp_touched"]
+                    outcome = self.mt5.get_position_outcome(ticket)
+                    win = outcome["win"] if outcome else trade["tp_touched"]
                     risk_engine.register_trade_result(win=win)
                 del self.active_trades[ticket]
